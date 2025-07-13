@@ -11,7 +11,7 @@
 <body>
     <nav>
         <ul>
-            <li><a href="../../index.html">← Back to Portfolio</a></li>
+            <li><a href="../../proj/index.html">← Back to Portfolio</a></li>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#data">Data</a></li>
             <li><a href="#analysis">Analysis</a></li>
@@ -27,12 +27,12 @@
                 The performance of these models is benchmarked against the established PAM50 predictor (Prosigna).
                 The analysis includes logistic regression as a baseline, with Random Forest and Gradient Boosting Machine (GBM) for improved predictive performance.
             </p>
-            <p><a href="https://github.com/pysma/proj/blob/main/docs/Final-Project.pdf" target="_blank">📄 View Full Paper (PDF)</a></p>
+            <p><a href="https://github.com/pysma/proj/blob/main/docs/Final-Project.pdf" target="_blank">📄 View Paper (PDF)</a></p>
         </section>
 
         <section id="data">
             <h2>Dataset Overview</h2>
-            <p>We compiled data from 18 clinical studies with binary pCR outcomes, including:</p>
+            <p>I compiled data from 18 clinical studies with binary pCR outcomes, including:</p>
             <ul>
                 <li><strong>pCR:</strong> List of 18 binary response vectors (0 or 1)</li>
                 <li><strong>XX_pCR:</strong> Expression matrices (10,115 genes × patients)</li>
@@ -76,7 +76,7 @@
 
         <section id="results">
             <h2>Key Findings</h2>
-            <p>Summary of model performances vs. the PAM50 benchmark:</p>
+            <p>Summary of model performances vs the PAM50 benchmark:</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <thead>
                     <tr>
@@ -113,7 +113,7 @@
                 mode: "lines+markers",
                 name: "AUC over Iterations"
             }], {
-                title: "Example Training Curve",
+                title: "Training Curve",
                 xaxis: { title: "Iteration" },
                 yaxis: { title: "AUC Score" }
             });
