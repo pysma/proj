@@ -1,6 +1,9 @@
-// Project data - customize this with your actual projects
+import { initializeChatbot } from './firebase-chat.js';
+
+// Project data 
 const projects = [
-    {   date: "2022-12-15",
+    {   
+        date: "2022-12-15",
         title: "Distributional Semantics",
         description: "First steps into NLP",
         badge: "Beginner",
@@ -13,7 +16,7 @@ const projects = [
         }
     },
     {
-        date: "2023-01-15",
+        date: "2023-03-26",
         title: "Analysis of Socio-Economic Indicators in Oklahoma",
         description: "First steps into big data for economics",
         badge: "Beginner",
@@ -25,32 +28,6 @@ const projects = [
             demo: "#"
         }
     },
- //   {
-        // date: "2023-04-22",
-        // title: "Machine Learning Classifier",
-        //description: "Built my first ML model for prediction tasks",
-        //badge: "Intermediate",
-        //details: {
-          //  overview: "Developed a sophisticated machine learning classifier to predict customer churn using advanced feature engineering and model selection techniques.",
-            //outcomes: "Achieved 89% accuracy with ensemble methods and deployed the model to production using Flask API.",
-           // tech: ["Scikit-learn", "XGBoost", "Flask", "Docker", "AWS"],
-           // github: "#",
-           // demo: "#"
-     //   }
-  //  },
-  //  {
-    //    date: "2023-07-10",
-     //   title: "Deep Learning Neural Network",
-//        description: "Explored neural networks for image classification",
-  //      badge: "Advanced",
-//        details: {
-//            overview: "Built a convolutional neural network for image classification using TensorFlow. Implemented data augmentation and transfer learning techniques.",
- //           outcomes: "Achieved 94% accuracy on test set and learned advanced deep learning concepts including regularization and optimization.",
-//            tech: ["TensorFlow", "Keras", "OpenCV", "NumPy", "GPU Computing"],
-//            github: "#",
-  //          demo: "#"
-    //    }
-   // },
     {
         date: "2024-10-05",
         title: "NLP Sentiment Analysis",
@@ -78,24 +55,30 @@ const projects = [
         }
     },
     {
-        date: "2024-06-15",
-        title: "AI-Powered Analytics Platform",
-        description: "Full-stack data science application",
-        badge: "Expert",
-        details: {
-            overview: "Developed a complete analytics platform combining multiple AI models with a React frontend and Python backend. Integrated real-time data processing and visualization.",
-            outcomes: "Successfully deployed to production serving 1000+ users daily with 99.9% uptime.",
-            tech: ["React", "FastAPI", "PostgreSQL", "Redis", "Kubernetes", "Grafana"],
-            github: "#",
-            demo: "#"
+ //      date: "2024-06-15",
+   //     title: "AI-Powered Analytics Platform",
+//        description: "Full-stack data science application",
+//        badge: "Expert",
+//        details: {
+//            overview: "Developed a complete analytics platform combining multiple AI models with a React frontend and Python backend. Integrated real-time data processing and visualization.",
+//            outcomes: "Successfully deployed to production serving 1000+ users daily with 99.9% uptime.",
+ //           tech: ["React", "FastAPI", "PostgreSQL", "Redis", "Kubernetes", "Grafana"],
+  //          github: "#",
+    //        demo: "#"
         }
     }
-
 ];
+
+// Timeline variables
+let isDragging = false;
+let currentProjectIndex = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize timeline
     initTimeline();
+    
+    // Initialize chatbot
+    initializeChatbot();
     
     // Smooth scrolling for navigation links
     document.querySelectorAll('nav a').forEach(anchor => {
@@ -238,39 +221,95 @@ function updateProjectDisplay() {
     content.classList.remove('active');
     
     setTimeout(() => {
-    content.innerHTML = `
-        <div class="project-title">
-            <span>${project.title}</span>
-            <div class="project-badge ${project.badge.toLowerCase()}">${project.badge}</div>
-        </div>
-        <p class="project-description">${project.description}</p>
-        <div class="project-details">
-            <h4>Project Details</h4>
-            <p>${project.details.overview}</p>
-            
-            <h4>Key Outcomes</h4>
-            <p>${project.details.outcomes}</p>
-            
-            <div class="tech-stack">
-                <h4>Tech Stack</h4>
-                <div class="tech-tags">
-                    ${project.details.tech.map(tech => 
-                        `<span class="tech-tag">${tech}</span>`
-                    ).join('')}
+        content.innerHTML = `
+            <div class="project-title">
+                <span>${project.title}</span>
+                <div class="project-badge ${project.badge.toLowerCase()}">${project.badge}</div>
+            </div>
+            <p class="project-description">${project.description}</p>
+            <div class="project-details">
+                <h4>Project Details</h4>
+                <p>${project.details.overview}</p>
+                
+                <h4>Key Outcomes</h4>
+                <p>${project.details.outcomes}</p>
+                
+                <div class="tech-stack">
+                    <h4>Tech Stack</h4>
+                    <div class="tech-tags">
+                        ${project.details.tech.map(tech => 
+                            `<span class="tech-tag">${tech}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="project-links">
+                    <a href="${project.details.github}" class="btn github-btn" target="_blank">
+                        <i class="fab fa-github"></i> View Code
+                    </a>
+                    ${project.details.demo !== '#' ? `
+                    <a href="${project.details.demo}" class="btn demo-btn" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Live Demo
+                    </a>
+                    ` : ''}
                 </div>
             </div>
-            
-            <div class="project-links">
-                <a href="${project.details.github}" class="btn github-btn" target="_blank">
-                    <i class="fab fa-github"></i> View Code
-                </a>
-                ${project.details.demo !== '#' ? `
-                <a href="${project.details.demo}" class="btn demo-btn" target="_blank">
-                    <i class="fas fa-external-link-alt"></i> Live Demo
-                </a>
-                ` : ''}
-            </div>
+        `;
+        content.classList.add('active');
+    }, 300);
+}
+
+function updateMarkers() {
+    const markers = document.querySelectorAll('.timeline-marker');
+    markers.forEach((marker, index) => {
+        marker.classList.toggle('active', index === currentProjectIndex);
+    });
+}
+
+function updateTimeline(index) {
+    const percentage = (index / Math.max(1, projects.length - 1)) * 100;
+    updateTimelinePosition(percentage);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+    });
+}
+
+// Project exhibit functions
+function openProjectExhibit(projectName) {
+    // Implementation for opening project exhibits
+    console.log('Opening project exhibit for:', projectName);
+    // Add your project exhibit logic here
+}
+
+// LLM Analysis functions
+function runLLMAnalysis() {
+    // Implementation for running LLM analysis
+    console.log('Running LLM analysis...');
+    // Add your LLM analysis logic here
+}
+
+function viewAnalysisResults() {
+    // Implementation for viewing analysis results
+    console.log('Viewing analysis results...');
+    // Add your results viewing logic here
+}
+
+// GPU status functions
+function updateGPUStatus() {
+    const gpuIndicator = document.getElementById('gpu-indicator');
+    if (!gpuIndicator) return;
+    
+    // Mock GPU status - replace with actual GPU monitoring
+    const isGPUActive = Math.random() > 0.5;
+    gpuIndicator.innerHTML = `
+        <div class="gpu-status-indicator ${isGPUActive ? 'active' : 'inactive'}">
+            <span class="status-dot"></span>
+            <span class="status-text">GPU ${isGPUActive ? 'Active' : 'Inactive'}</span>
         </div>
     `;
-    content.classList.add('active');
-}, 300);
+}
