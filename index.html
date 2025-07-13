@@ -3,584 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Project Timeline</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .timeline-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .timeline-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .timeline-header h1 {
-            color: #333;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .timeline-wrapper {
-            position: relative;
-            padding: 2rem 0;
-        }
-
-        .timeline-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-            transform: translateY(-50%);
-        }
-
-        .timeline-slider {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-
-        .timeline-handle {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border: 3px solid #667eea;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            cursor: grab;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
-
-        .timeline-handle:hover {
-            transform: translate(-50%, -50%) scale(1.2);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .timeline-handle:active {
-            cursor: grabbing;
-        }
-
-        .timeline-markers {
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            margin: 3rem 0;
-        }
-
-        .timeline-marker {
-            position: relative;
-            text-align: center;
-            flex: 1;
-            opacity: 0.4;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-marker.active {
-            opacity: 1;
-            transform: scale(1.05);
-        }
-
-        .marker-dot {
-            width: 12px;
-            height: 12px;
-            background: #ccc;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-marker.active .marker-dot {
-            background: #667eea;
-            transform: scale(1.3);
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .marker-date {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .marker-title {
-            font-size: 1rem;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .marker-description {
-            font-size: 0.8rem;
-            color: #777;
-            max-width: 150px;
-            margin: 0 auto;
-            line-height: 1.4;
-        }
-
-        .project-showcase {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-top: 3rem;
-            transition: all 0.5s ease;
-            min-height: 300px;
-        }
-
-        .project-content {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
-        }
-
-        .project-content.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .project-title {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .project-badge {
-            background: #667eea;
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .project-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-
-        .project-info {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .project-info h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .project-info p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .tech-tag {
-            background: #f0f2f5;
-            color: #555;
-            padding: 0.3rem 0.6rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .project-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .project-link {
-            background: #667eea;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .project-link:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .timeline-progress {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4CAF50, #45a049);
-            border-radius: 2px;
-            transform: translateY(-50%);
-            transition: width 0.3s ease;
-            z-index: 5;
-        }
-
-        .date-display {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(102, 126, 234, 0.9);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-
-        .date-display.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-10px);
-        }
-
-        @media (max-width: 768px) {
-            .project-details {
-                grid-template-columns: 1fr;
-            }
-            
-            .timeline-markers {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .timeline-marker {
-                text-align: left;
-                padding: 1rem;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 10px;
-            }
-        }
-    </style>
+    <title>Your Name - Data Science Portfolio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
 </head>
 <body>
-    <div class="timeline-container">
-        <div class="timeline-header">
-            <h1>Project Timeline</h1>
-            <p>Drag the slider to explore my data science journey</p>
-        </div>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#timeline">Timeline</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#llm-analysis">LLM Analysis</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
 
-        <div class="timeline-wrapper">
-            <div class="timeline-line"></div>
-            <div class="timeline-progress" id="timelineProgress"></div>
-            <div class="timeline-slider" id="timelineSlider">
-                <div class="timeline-handle" id="timelineHandle">
-                    <div class="date-display" id="dateDisplay"></div>
-                </div>
-            </div>
-        </div>
+    <main>
+        <section id="home">
+            <h1>Data Science Portfolio</h1>
+            <p>Interactive exhibits showcasing data science projects and language model analysis</p>
+        </section>
 
-        <div class="timeline-markers" id="timelineMarkers">
-            <!-- Markers will be generated by JavaScript -->
-        </div>
-
-        <div class="project-showcase">
-            <div class="project-content active" id="projectContent">
-                <div class="project-title">
-                    <span>Welcome to My Data Science Journey</span>
-                    <div class="project-badge">Start Here</div>
-                </div>
-                <p>Drag the timeline above to explore my projects chronologically. Each point represents a milestone in my data science career.</p>
-                <div class="project-details">
-                    <div class="project-info">
-                        <h3>About This Timeline</h3>
-                        <p>This interactive timeline showcases my progression from beginner to advanced data scientist, highlighting key projects and learning milestones.</p>
-                    </div>
-                    <div class="project-info">
-                        <h3>How to Use</h3>
-                        <p>Click and drag the blue handle along the timeline to see different projects. Each project includes details about technologies used and outcomes achieved.</p>
+        <section id="timeline">
+            <h2>Project Timeline</h2>
+            <p>Drag the slider to explore my data science journey chronologically</p>
+            
+            <div class="timeline-wrapper">
+                <div class="timeline-line"></div>
+                <div class="timeline-progress" id="timelineProgress"></div>
+                <div class="timeline-slider" id="timelineSlider">
+                    <div class="timeline-handle" id="timelineHandle">
+                        <div class="date-display" id="dateDisplay"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        // Project data - customize this with your actual projects
-        const projects = [
-            {
-                date: "2023-01-15",
-                title: "Data Analysis Fundamentals",
-                description: "First steps into data science with Python and pandas",
-                badge: "Beginner",
-                details: {
-                    overview: "My first serious data science project where I analyzed customer behavior patterns using Python. This project taught me the fundamentals of data cleaning, exploration, and basic visualization.",
-                    outcomes: "Successfully identified key customer segments and provided actionable insights that improved retention by 15%.",
-                    tech: ["Python", "Pandas", "Matplotlib", "Seaborn", "Jupyter"],
-                    github: "#",
-                    demo: "#"
-                }
-            },
-            {
-                date: "2023-04-22",
-                title: "Machine Learning Classifier",
-                description: "Built my first ML model for prediction tasks",
-                badge: "Intermediate",
-                details: {
-                    overview: "Developed a sophisticated machine learning classifier to predict customer churn using advanced feature engineering and model selection techniques.",
-                    outcomes: "Achieved 89% accuracy with ensemble methods and deployed the model to production using Flask API.",
-                    tech: ["Scikit-learn", "XGBoost", "Flask", "Docker", "AWS"],
-                    github: "#",
-                    demo: "#"
-                }
-            },
-            {
-                date: "2023-07-10",
-                title: "Deep Learning Neural Network",
-                description: "Explored neural networks for image classification",
-                badge: "Advanced",
-                details: {
-                    overview: "Built a convolutional neural network for image classification using TensorFlow. Implemented data augmentation and transfer learning techniques.",
-                    outcomes: "Achieved 94% accuracy on test set and learned advanced deep learning concepts including regularization and optimization.",
-                    tech: ["TensorFlow", "Keras", "OpenCV", "NumPy", "GPU Computing"],
-                    github: "#",
-                    demo: "#"
-                }
-            },
-            {
-                date: "2023-10-05",
-                title: "NLP Sentiment Analysis",
-                description: "Natural language processing for text analysis",
-                badge: "Advanced",
-                details: {
-                    overview: "Developed a comprehensive sentiment analysis system using transformer models and BERT. Processed over 100K social media posts for brand monitoring.",
-                    outcomes: "Created real-time sentiment dashboard and improved brand response time by 40%.",
-                    tech: ["BERT", "Transformers", "spaCy", "Streamlit", "MongoDB"],
-                    github: "#",
-                    demo: "#"
-                }
-            },
-            {
-                date: "2024-01-20",
-                title: "LLM Prompt Engineering",
-                description: "Advanced prompt analysis with GPU acceleration",
-                badge: "Expert",
-                details: {
-                    overview: "Built a sophisticated system for analyzing and optimizing language model prompts using GPU acceleration. Implemented custom evaluation metrics and automated testing.",
-                    outcomes: "Improved prompt effectiveness by 60% and created a reusable framework for prompt optimization.",
-                    tech: ["PyTorch", "CUDA", "Hugging Face", "MLflow", "Ray"],
-                    github: "#",
-                    demo: "#"
-                }
-            },
-            {
-                date: "2024-06-15",
-                title: "AI-Powered Analytics Platform",
-                description: "Full-stack data science application",
-                badge: "Expert",
-                details: {
-                    overview: "Developed a complete analytics platform combining multiple AI models with a React frontend and Python backend. Integrated real-time data processing and visualization.",
-                    outcomes: "Successfully deployed to production serving 1000+ users daily with 99.9% uptime.",
-                    tech: ["React", "FastAPI", "PostgreSQL", "Redis", "Kubernetes", "Grafana"],
-                    github: "#",
-                    demo: "#"
-                }
-            }
-        ];
+            <div class="timeline-markers" id="timelineMarkers">
+                <!-- Markers will be generated by JavaScript -->
+            </div>
 
-        let currentProjectIndex = 0;
-        let isDragging = false;
-
-        // Initialize timeline
-        function initTimeline() {
-            const markersContainer = document.getElementById('timelineMarkers');
-            const slider = document.getElementById('timelineSlider');
-            const handle = document.getElementById('timelineHandle');
-            const progress = document.getElementById('timelineProgress');
-            const dateDisplay = document.getElementById('dateDisplay');
-
-            // Create markers
-            projects.forEach((project, index) => {
-                const marker = document.createElement('div');
-                marker.className = `timeline-marker ${index === 0 ? 'active' : ''}`;
-                marker.innerHTML = `
-                    <div class="marker-dot"></div>
-                    <div class="marker-date">${formatDate(project.date)}</div>
-                    <div class="marker-title">${project.title}</div>
-                    <div class="marker-description">${project.description}</div>
-                `;
-                markersContainer.appendChild(marker);
-            });
-
-            // Add event listeners
-            handle.addEventListener('mousedown', startDrag);
-            slider.addEventListener('click', handleSliderClick);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-
-            // Touch events for mobile
-            handle.addEventListener('touchstart', startDrag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('touchend', stopDrag);
-
-            updateTimeline(0);
-        }
-
-        function startDrag(e) {
-            isDragging = true;
-            e.preventDefault();
-            document.getElementById('dateDisplay').classList.add('show');
-        }
-
-        function drag(e) {
-            if (!isDragging) return;
-            
-            const slider = document.getElementById('timelineSlider');
-            const rect = slider.getBoundingClientRect();
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const x = clientX - rect.left;
-            const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-            
-            updateTimelinePosition(percentage);
-        }
-
-        function stopDrag() {
-            isDragging = false;
-            document.getElementById('dateDisplay').classList.remove('show');
-        }
-
-        function handleSliderClick(e) {
-            if (isDragging) return;
-            
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const percentage = (x / rect.width) * 100;
-            
-            updateTimelinePosition(percentage);
-        }
-
-        function updateTimelinePosition(percentage) {
-            const handle = document.getElementById('timelineHandle');
-            const progress = document.getElementById('timelineProgress');
-            const dateDisplay = document.getElementById('dateDisplay');
-            
-            handle.style.left = `${percentage}%`;
-            progress.style.width = `${percentage}%`;
-            
-            // Calculate which project to show
-            const projectIndex = Math.floor((percentage / 100) * projects.length);
-            const clampedIndex = Math.max(0, Math.min(projects.length - 1, projectIndex));
-            
-            if (clampedIndex !== currentProjectIndex) {
-                currentProjectIndex = clampedIndex;
-                updateProjectDisplay();
-                updateMarkers();
-            }
-            
-            // Update date display
-            const currentProject = projects[currentProjectIndex];
-            dateDisplay.textContent = formatDate(currentProject.date);
-        }
-
-        function updateProjectDisplay() {
-            const project = projects[currentProjectIndex];
-            const content = document.getElementById('projectContent');
-            
-            content.classList.remove('active');
-            
-            setTimeout(() => {
-                content.innerHTML = `
+            <div class="project-showcase">
+                <div class="project-content active" id="projectContent">
                     <div class="project-title">
-                        <span>${project.title}</span>
-                        <div class="project-badge">${project.badge}</div>
+                        <span>Welcome to My Data Science Journey</span>
+                        <div class="project-badge">Start Here</div>
                     </div>
-                    <p>${project.description}</p>
+                    <p>Drag the timeline above to explore my projects chronologically. Each point represents a milestone in my data science career.</p>
                     <div class="project-details">
                         <div class="project-info">
-                            <h3>Project Overview</h3>
-                            <p>${project.details.overview}</p>
-                            <div class="tech-stack">
-                                ${project.details.tech.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
-                            </div>
+                            <h3>About This Timeline</h3>
+                            <p>This interactive timeline showcases my progression from beginner to advanced data scientist, highlighting key projects and learning milestones.</p>
                         </div>
                         <div class="project-info">
-                            <h3>Key Outcomes</h3>
-                            <p>${project.details.outcomes}</p>
-                            <div class="project-links">
-                                <a href="${project.details.github}" class="project-link">GitHub</a>
-                                <a href="${project.details.demo}" class="project-link">Live Demo</a>
-                            </div>
+                            <h3>How to Use</h3>
+                            <p>Click and drag the blue handle along the timeline to see different projects. Each project includes details about technologies used and outcomes achieved.</p>
                         </div>
                     </div>
-                `;
-                content.classList.add('active');
-            }, 250);
-        }
+                </div>
+            </div>
+        </section>
 
-        function updateMarkers() {
-            const markers = document.querySelectorAll('.timeline-marker');
-            markers.forEach((marker, index) => {
-                marker.classList.toggle('active', index === currentProjectIndex);
-            });
-        }
+        <section id="projects">
+            <h2>Data Science Projects</h2>
+            <div class="project-grid">
+                <div class="project-card" data-project="project1">
+                    <h3>Project 1: Data Analysis</h3>
+                    <p>Description of your first project</p>
+                    <button class="view-project">View Interactive Exhibit</button>
+                </div>
+                <!-- Add more project cards -->
+            </div>
+        </section>
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short' 
-            });
-        }
+        <section id="llm-analysis">
+            <h2>Language Model Prompt Analysis</h2>
+            <div class="llm-dashboard">
+                <div class="gpu-status">
+                    <h3>GPU Processing Status</h3>
+                    <div id="gpu-indicator"></div>
+                </div>
+                <div class="analysis-controls">
+                    <button id="run-analysis">Run New Analysis</button>
+                    <button id="view-results">View Results</button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-        function updateTimeline(index) {
-            const percentage = (index / (projects.length - 1)) * 100;
-            updateTimelinePosition(percentage);
-        }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initTimeline);
-    </script>
+    <script src="js/main.js"></script>
 </body>
 </html>
