@@ -51,7 +51,26 @@ section {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
+.contact-button {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.3s ease;
+}
 
+.contact-button i {
+    margin-right: 8px;
+}
+
+.contact-button:hover {
+    opacity: 0.9;
+}
 /* Timeline Styles */
 .timeline-wrapper {
     position: relative;
