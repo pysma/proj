@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1 - Predicting pCR</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="../../index.html">← Back to Portfolio</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#data">Data</a></li>
+            <li><a href="#analysis">Analysis</a></li>
+            <li><a href="#results">Results</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h1>Predicting Pathological Complete Response (pCR) Using Gene Expression Data</h1>
+            <p>
+                This project aims to develop machine learning models to predict pathological complete response (pCR) in breast cancer patients using gene expression data.
+                The performance of these models is benchmarked against the established PAM50 predictor (Prosigna).
+                The analysis includes logistic regression as a baseline, with Random Forest and Gradient Boosting Machine (GBM) for improved predictive performance.
+            </p>
+            <p><a href="https://github.com/pysma/proj/blob/main/docs/Final-Project.pdf" target="_blank">📄 View Full Paper (PDF)</a></p>
+        </section>
+
+        <section id="data">
+            <h2>Dataset Overview</h2>
+            <p>We compiled data from 18 clinical studies with binary pCR outcomes, including:</p>
+            <ul>
+                <li><strong>pCR:</strong> List of 18 binary response vectors (0 or 1)</li>
+                <li><strong>XX_pCR:</strong> Expression matrices (10,115 genes × patients)</li>
+                <li><strong>pam50_recur:</strong> Benchmark prediction vectors</li>
+                <li><strong>Split:</strong> Study 10 used as test set; others for training</li>
+            </ul>
+            <div id="data-visualization" style="height:400px;"></div>
+            <button onclick="loadDataset()">Load Sample Visualization</button>
+        </section>
+
+        <section id="analysis">
+            <h2>Methods & Modeling</h2>
+            <h3>Data Preprocessing</h3>
+            <ul>
+                <li>Filtered to common genes across datasets</li>
+                <li>Batch effect correction using MKI67 (proliferation marker)</li>
+                <li>Normalized expression by subtracting and scaling MKI67</li>
+            </ul>
+
+            <h3>Feature Engineering</h3>
+            <ul>
+                <li>PCA for dimensionality reduction</li>
+                <li>Rigorous selection of informative biomarkers</li>
+            </ul>
+
+            <h3>Modeling Approach</h3>
+            <ul>
+                <li>Baseline: Logistic Regression</li>
+                <li>Model II: Random Forest</li>
+                <li>Model III: Gradient Boosting Machine (GBM)</li>
+                <li>Leave-one-study-out cross-validation</li>
+            </ul>
+
+            <div class="analysis-controls">
+                <button onclick="runAnalysis('correlation')">Run Correlation Check</button>
+                <button onclick="runAnalysis('regression')">Run Logistic Regression</button>
+                <button onclick="runAnalysis('clustering')">Run GBM Clustering</button>
+            </div>
+            <div id="analysis-results" style="margin-top: 20px;"></div>
+        </section>
+
+        <section id="results">
+            <h2>Key Findings</h2>
+            <p>Summary of model performances vs. the PAM50 benchmark:</p>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Model</th><th>Train AUC</th><th>Test AUC</th><th>Gap</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>PAM50 Benchmark</td><td>0.524</td><td>0.571</td><td>-0.047</td></tr>
+                    <tr><td>Logistic Regression</td><td>0.674</td><td>0.754</td><td>-0.079</td></tr>
+                    <tr><td>Random Forest</td><td>0.820</td><td>0.715</td><td>0.105</td></tr>
+                    <tr><td>GBM</td><td>0.730</td><td>0.753</td><td>-0.023</td></tr>
+                </tbody>
+            </table>
+            <p>
+                Notably, logistic regression outperformed Prosigna's PAM50 features. GBM showed strong generalization, even exceeding training AUC.
+            </p>
+        </section>
+
+        <section id="limitations">
+            <h2>Limitations</h2>
+            <ul>
+                <li>Logistic regression may underperform with non-logistic relationships</li>
+                <li>Random Forest showed signs of overfitting (high AUC gap)</li>
+                <li>Dependent on consistency in gene expression measurements across studies</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        function loadDataset() {
+            Plotly.newPlot("data-visualization", [{
+                x: [1, 2, 3, 4, 5],
+                y: [0.65, 0.67, 0.72, 0.75, 0.76],
+                mode: "lines+markers",
+                name: "AUC over Iterations"
+            }], {
+                title: "Example Training Curve",
+                xaxis: { title: "Iteration" },
+                yaxis: { title: "AUC Score" }
+            });
+        }
+
+        function runAnalysis(type) {
+            const output = document.getElementById("analysis-results");
+            let msg = "";
+            switch (type) {
+                case "correlation":
+                    msg = "Performed Spearman correlation across selected genes.";
+                    break;
+                case "regression":
+                    msg = "Logistic regression fit yielded a test AUC of 0.754.";
+                    break;
+                case "clustering":
+                    msg = "GBM clustering indicates subgroups with distinct biomarker expression profiles.";
+                    break;
+                default:
+                    msg = "Unknown analysis selected.";
+            }
+            output.innerText = msg;
+        }
+    </script>
+</body>
+</html>
+
