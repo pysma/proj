@@ -406,7 +406,93 @@
             text-align: center;
             color: #333;
         }
+                .contact-container {
+            max-width: 600px;
+            text-align: center;
+        }
 
+        .contact-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .contact-content h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.5em;
+        }
+
+        .contact-content p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .contact-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .contact-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .contact-button i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .contact-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            opacity: 0.9;
+        }
+
+        .contact-button:active {
+            transform: translateY(0);
+        }
+
+        /* Individual button colors */
+        .contact-button.linkedin {
+            background: linear-gradient(135deg, #0077B5 0%, #005885 100%);
+        }
+
+        .contact-button.instagram {
+            background: linear-gradient(135deg, #E4405F 0%, #C13584 100%);
+        }
+
+        .contact-button.facebook {
+            background: linear-gradient(135deg, #1877F2 0%, #0C63D4 100%);
+        }
+
+        .contact-button.email {
+            background: linear-gradient(135deg, #EA4335 0%, #D33B2C 100%);
+        }
+
+        @media (max-width: 768px) {
+            .contact-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-button {
+                padding: 12px 20px;
+            }
+        }
         /* Timeline Styles */
         .timeline-wrapper {
             position: relative;
@@ -942,32 +1028,30 @@
             </div>
         </section>
 
-        <section id="contact">
-            <h2>Reach out!</h2>
-            <div class="project-showcase">
-                <div class="project-content">
-                    <h3>Contact Me</h3>
-                    <div id="button-container">
-                        <a href="https://www.linkedin.com/in/simon-mpy" class="contact-button">
-                            <i class="fab fa-linkedin"></i> LinkedIn
-                        </a>
-                        <a href="https://www.instagram.com/s1monma" class="contact-button">
-                            <i class="fab fa-instagram"></i> Instagram
-                        </a>
-                        <a href="https://www.facebook.com/smiley.simon.92/" class="contact-button">
-                            <i class="fab fa-facebook"></i> Facebook
-                        </a>
-                        <a href="mailto:simon_smile2011@yahoo.com.sg" class="contact-button">
-                            <i class="fas fa-envelope"></i> Email
-                        </a>
-                    </div>
-                </div>
-                <div class="project-details">
-                    <button id="run-new">Run New</button>
-                    <button id="view">View</button>
+    <section id="contact">
+        <h2>Reach out!</h2>
+        <div class="contact-container">
+            <div class="contact-content">
+                <h3>Contact Me</h3>
+                <p>I'd love to hear from you! Whether you have questions about my projects, want to collaborate, or just want to say hello, feel free to reach out through any of these platforms.</p>
+                
+                <div class="contact-buttons">
+                    <a href="https://www.linkedin.com/in/simon-mpy" class="contact-button linkedin">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                    <a href="https://www.instagram.com/s1monma" class="contact-button instagram">
+                        <i class="fab fa-instagram"></i> Instagram
+                    </a>
+                    <a href="https://www.facebook.com/smiley.simon.92/" class="contact-button facebook">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="mailto:simon_smile2011@yahoo.com.sg" class="contact-button email">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
     </main>
 
 
