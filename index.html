@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Data Science Portfolio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#llm-analysis">LLM Analysis</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="home">
+            <h1>Data Science Portfolio</h1>
+            <p>Interactive exhibits showcasing data science projects and language model analysis</p>
+        </section>
+
+        <section id="projects">
+            <h2>Data Science Projects</h2>
+            <div class="project-grid">
+                <div class="project-card" data-project="project1">
+                    <h3>Project 1: Data Analysis</h3>
+                    <p>Description of your first project</p>
+                    <button class="view-project">View Interactive Exhibit</button>
+                </div>
+                <!-- Add more project cards -->
+            </div>
+        </section>
+
+        <section id="llm-analysis">
+            <h2>Language Model Prompt Analysis</h2>
+            <div class="llm-dashboard">
+                <div class="gpu-status">
+                    <h3>GPU Processing Status</h3>
+                    <div id="gpu-indicator"></div>
+                </div>
+                <div class="analysis-controls">
+                    <button id="run-analysis">Run New Analysis</button>
+                    <button id="view-results">View Results</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
