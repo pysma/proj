@@ -93,16 +93,18 @@ const projects = [
 
 ];
 
-let currentProjectIndex = 0;
-let isDragging = false;
-
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize timeline
+    initTimeline();
+    
     // Smooth scrolling for navigation links
     document.querySelectorAll('nav a').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
-            target.scrollIntoView({ behavior: 'smooth' });
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
         });
     });
 
@@ -116,42 +118,159 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // LLM Analysis buttons
-    document.getElementById('run-analysis').addEventListener('click', runLLMAnalysis);
-    document.getElementById('view-results').addEventListener('click', viewAnalysisResults);
+    const runAnalysisBtn = document.getElementById('run-analysis');
+    const viewResultsBtn = document.getElementById('view-results');
+    
+    if (runAnalysisBtn) runAnalysisBtn.addEventListener('click', runLLMAnalysis);
+    if (viewResultsBtn) viewResultsBtn.addEventListener('click', viewAnalysisResults);
 
     // GPU status indicator
     updateGPUStatus();
     setInterval(updateGPUStatus, 5000); // Update every 5 seconds
 });
 
-function openProjectExhibit(projectName) {
-    // Create modal or navigate to project page
-    window.open(`projects/${projectName}/index.html`, '_blank');
+// Timeline Functions
+function initTimeline() {
+    const markersContainer = document.getElementById('timelineMarkers');
+    const slider = document.getElementById('timelineSlider');
+    const handle = document.getElementById('timelineHandle');
+    
+    if (!markersContainer || !slider || !handle) return; // Timeline not on this page
+
+    // Create markers
+    markersContainer.innerHTML = '';
+    projects.forEach((project, index) => {
+        const marker = document.createElement('div');
+        marker.className = `timeline-marker ${index === 0 ? 'active' : ''}`;
+        marker.innerHTML = `
+            <div class="marker-dot"></div>
+            <div class="marker-date">${formatDate(project.date)}</div>
+            <div class="marker-title">${project.title}</div>
+            <div class="marker-description">${project.description}</div>
+        `;
+        markersContainer.appendChild(marker);
+    });
+
+    // Add event listeners
+    handle.addEventListener('mousedown', startDrag);
+    slider.addEventListener('click', handleSliderClick);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+
+    // Touch events for mobile
+    handle.addEventListener('touchstart', startDrag);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', stopDrag);
+
+    updateTimeline(0);
 }
 
-function runLLMAnalysis() {
-    // Simulate GPU analysis
-    const indicator = document.getElementById('gpu-indicator');
-    indicator.className = 'gpu-active';
+function startDrag(e) {
+    isDragging = true;
+    e.preventDefault();
+    const dateDisplay = document.getElementById('dateDisplay');
+    if (dateDisplay) dateDisplay.classList.add('show');
+}
+
+function drag(e) {
+    if (!isDragging) return;
     
-    // You would replace this with actual API calls to your GPU analysis
-    console.log('Running LLM prompt analysis...');
+    const slider = document.getElementById('timelineSlider');
+    if (!slider) return;
     
-    // Simulate analysis completion
+    const rect = slider.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    
+    updateTimelinePosition(percentage);
+}
+
+function stopDrag() {
+    isDragging = false;
+    const dateDisplay = document.getElementById('dateDisplay');
+    if (dateDisplay) dateDisplay.classList.remove('show');
+}
+
+function handleSliderClick(e) {
+    if (isDragging) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    
+    updateTimelinePosition(percentage);
+}
+
+function updateTimelinePosition(percentage) {
+    const handle = document.getElementById('timelineHandle');
+    const progress = document.getElementById('timelineProgress');
+    const dateDisplay = document.getElementById('dateDisplay');
+    
+    if (!handle || !progress) return;
+    
+    handle.style.left = `${percentage}%`;
+    progress.style.width = `${percentage}%`;
+    
+    // Calculate which project to show
+    const projectIndex = Math.floor((percentage / 100) * projects.length);
+    const clampedIndex = Math.max(0, Math.min(projects.length - 1, projectIndex));
+    
+    if (clampedIndex !== currentProjectIndex) {
+        currentProjectIndex = clampedIndex;
+        updateProjectDisplay();
+        updateMarkers();
+    }
+    
+    // Update date display
+    if (dateDisplay) {
+        const currentProject = projects[currentProjectIndex];
+        dateDisplay.textContent = formatDate(currentProject.date);
+    }
+}
+
+function updateProjectDisplay() {
+    const project = projects[currentProjectIndex];
+    const content = document.getElementById('projectContent');
+    
+    if (!content) return;
+    
+    content.classList.remove('active');
+    
     setTimeout(() => {
-        alert('Analysis complete! Check the results section.');
-        indicator.className = 'gpu-inactive';
-    }, 3000);
-}
-
-function viewAnalysisResults() {
-    window.open('projects/llm-prompt-analysis/index.html', '_blank');
-}
-
-function updateGPUStatus() {
-    // You would replace this with actual GPU status checking
-    const indicator = document.getElementById('gpu-indicator');
-    const isGPUActive = Math.random() > 0.5; // Simulate random status
-    
-    indicator.className = isGPUActive ? 'gpu-active' : 'gpu-inactive';
-}
+    content.innerHTML = `
+        <div class="project-title">
+            <span>${project.title}</span>
+            <div class="project-badge ${project.badge.toLowerCase()}">${project.badge}</div>
+        </div>
+        <p class="project-description">${project.description}</p>
+        <div class="project-details">
+            <h4>Project Details</h4>
+            <p>${project.details.overview}</p>
+            
+            <h4>Key Outcomes</h4>
+            <p>${project.details.outcomes}</p>
+            
+            <div class="tech-stack">
+                <h4>Tech Stack</h4>
+                <div class="tech-tags">
+                    ${project.details.tech.map(tech => 
+                        `<span class="tech-tag">${tech}</span>`
+                    ).join('')}
+                </div>
+            </div>
+            
+            <div class="project-links">
+                <a href="${project.details.github}" class="btn github-btn" target="_blank">
+                    <i class="fab fa-github"></i> View Code
+                </a>
+                ${project.details.demo !== '#' ? `
+                <a href="${project.details.demo}" class="btn demo-btn" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Live Demo
+                </a>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    content.classList.add('active');
+}, 300);
