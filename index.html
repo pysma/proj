@@ -9,1077 +9,955 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
 
-
-    <script type="module" src="js/firebase-init.js"></script>
-
-
-
-    <!-- Firebase SDK -->
-
     <script type="module">
-
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-
-
         // Your Firebase configuration
-
         const firebaseConfig = {
-
             apiKey: "AIzaSyBLpFEQ__mNK9ZMVYjOP3Nz3iVvqTp84IU",
-
             authDomain: "subs-bc58c.firebaseapp.com",
-
             projectId: "subs-bc58c",
-
             storageBucket: "subs-bc58c.firebasestorage.app",
-
             messagingSenderId: "854415154113",
-
             appId: "1:854415154113:web:26f58cf3a7ab3a4c9ead40"
-
         };
 
-
-
         // Initialize Firebase
-
         const app = initializeApp(firebaseConfig);
-
         const db = getFirestore(app);
-
         const auth = getAuth(app);
 
-
-
         // Gemini API configuration
-
         const GEMINI_API_KEY = 'AIzaSyBLpFEQ__mNK9ZMVYjOP3Nz3iVvqTp84IU';
-
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
-
-
         // Global variables
-
         let currentUser = null;
-
         let chatMessages = [];
 
-
-
         // Initialize authentication
-
         onAuthStateChanged(auth, (user) => {
-
             if (user) {
-
                 currentUser = user;
-
                 loadChatHistory();
-
             } else {
-
                 signInAnonymously(auth);
-
             }
-
         });
 
-
-
         // Load chat history from Firestore
-
         async function loadChatHistory() {
-
             const q = query(
-
                 collection(db, 'chat_messages'),
-
                 orderBy('timestamp', 'asc')
-
             );
 
-
-
             onSnapshot(q, (snapshot) => {
-
                 chatMessages = [];
-
                 snapshot.forEach((doc) => {
-
                     chatMessages.push({ id: doc.id, ...doc.data() });
-
                 });
-
                 displayChatHistory();
-
             });
-
         }
 
-
-
         // Display chat messages
-
         function displayChatHistory() {
-
             const chatContainer = document.getElementById('chat-messages');
-
             if (!chatContainer) return;
-
-
 
             chatContainer.innerHTML = '';
 
-
-
             chatMessages.forEach(message => {
-
                 const messageDiv = document.createElement('div');
-
                 messageDiv.className = `message ${message.sender}`;
-
                 messageDiv.innerHTML = `
-
                     <div class="message-content">
-
                         <div class="message-text">${message.text}</div>
-
                         <div class="message-time">${formatTime(message.timestamp)}</div>
-
                     </div>
-
                 `;
-
                 chatContainer.appendChild(messageDiv);
-
             });
 
-
-
             chatContainer.scrollTop = chatContainer.scrollHeight;
-
         }
-
-
 
         // Format timestamp
-
         function formatTime(timestamp) {
-
             if (!timestamp) return '';
-
             return new Date(timestamp.seconds * 1000).toLocaleTimeString();
-
         }
-
-
 
         // Save message to Firestore
-
         async function saveMessage(text, sender) {
-
             try {
-
                 await addDoc(collection(db, 'chat_messages'), {
-
                     text: text,
-
                     sender: sender,
-
                     userId: currentUser.uid,
-
                     timestamp: serverTimestamp()
-
                 });
-
             } catch (error) {
-
                 console.error('Error saving message:', error);
-
             }
-
         }
 
-
-
         // Call Gemini API
-
         async function callGeminiAPI(prompt) {
-
             try {
-
                 const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-
                     method: 'POST',
-
                     headers: {
-
                         'Content-Type': 'application/json',
-
                     },
-
                     body: JSON.stringify({
-
                         contents: [{
-
                             parts: [{
-
                                 text: prompt
-
                             }]
-
                         }]
-
                     })
-
                 });
-
-
 
                 const data = await response.json();
 
-
-
                 if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-
                     return data.candidates[0].content.parts[0].text;
-
                 } else {
-
                     throw new Error('Invalid response from Gemini API');
-
                 }
-
             } catch (error) {
-
                 console.error('Error calling Gemini API:', error);
-
                 return 'Sorry, I encountered an error. Please try again.';
-
             }
-
         }
 
-
-
-        // Send message
-
+        // Send message - Fixed version
         async function sendMessage() {
-
             const input = document.getElementById('chat-input');
-
             const sendButton = document.getElementById('send-button');
-
-
 
             if (!input.value.trim()) return;
 
-
-
             const userMessage = input.value.trim();
-
-            input.value = '';
-
-
-
-            // Disable send button
-
+            
+            // Disable send button immediately
             sendButton.disabled = true;
-
             sendButton.textContent = 'Sending...';
 
-
-
-            // Save user message
-
+            // Save user message first, then clear input
             await saveMessage(userMessage, 'user');
-
-
+            input.value = '';
 
             // Show typing indicator
-
             showTypingIndicator();
 
-
-
             // Get AI response
-
             const aiResponse = await callGeminiAPI(userMessage);
 
-
-
             // Hide typing indicator
-
             hideTypingIndicator();
 
-
-
             // Save AI response
-
             await saveMessage(aiResponse, 'ai');
 
-
-
             // Re-enable send button
-
             sendButton.disabled = false;
-
             sendButton.textContent = 'Send';
-
         }
-
-
 
         // Show typing indicator
-
         function showTypingIndicator() {
-
             const chatContainer = document.getElementById('chat-messages');
-
             const typingDiv = document.createElement('div');
-
             typingDiv.id = 'typing-indicator';
-
             typingDiv.className = 'message ai typing';
-
             typingDiv.innerHTML = `
-
                 <div class="message-content">
-
                     <div class="typing-dots">
-
                         <span></span>
-
                         <span></span>
-
                         <span></span>
-
                     </div>
-
                 </div>
-
             `;
-
             chatContainer.appendChild(typingDiv);
-
             chatContainer.scrollTop = chatContainer.scrollHeight;
-
         }
-
-
 
         // Hide typing indicator
-
         function hideTypingIndicator() {
-
             const typingIndicator = document.getElementById('typing-indicator');
-
             if (typingIndicator) {
-
                 typingIndicator.remove();
-
             }
-
         }
 
+        // Timeline data
+        const timelineData = [
+            { date: '2023-01-15', title: 'Data Analysis Fundamentals', description: 'Started learning Python and pandas for data manipulation', badge: 'Python' },
+            { date: '2023-03-10', title: 'First Machine Learning Project', description: 'Built a regression model to predict housing prices', badge: 'ML' },
+            { date: '2023-05-22', title: 'Data Visualization Mastery', description: 'Created interactive dashboards using Plotly and Matplotlib', badge: 'Visualization' },
+            { date: '2023-08-14', title: 'Deep Learning Introduction', description: 'Implemented neural networks using TensorFlow', badge: 'Deep Learning' },
+            { date: '2023-11-05', title: 'NLP Project', description: 'Built a sentiment analysis system for social media data', badge: 'NLP' },
+            { date: '2024-01-20', title: 'Advanced Analytics', description: 'Developed time series forecasting models', badge: 'Analytics' }
+        ];
 
+        // Timeline functionality
+        function initializeTimeline() {
+            const slider = document.getElementById('timelineSlider');
+            const handle = document.getElementById('timelineHandle');
+            const progress = document.getElementById('timelineProgress');
+            const dateDisplay = document.getElementById('dateDisplay');
+            const markersContainer = document.getElementById('timelineMarkers');
+            const projectContent = document.getElementById('projectContent');
 
-        // Initialize chatbot when DOM is loaded
+            if (!slider || !handle || !progress || !dateDisplay || !markersContainer || !projectContent) {
+                console.error('Timeline elements not found');
+                return;
+            }
 
+            // Create timeline markers
+            markersContainer.innerHTML = '';
+            timelineData.forEach((item, index) => {
+                const marker = document.createElement('div');
+                marker.className = 'timeline-marker';
+                marker.style.left = `${(index / (timelineData.length - 1)) * 100}%`;
+                marker.setAttribute('data-index', index);
+                markersContainer.appendChild(marker);
+            });
+
+            let isDragging = false;
+            let currentIndex = 0;
+
+            function updateTimeline(index) {
+                const percentage = (index / (timelineData.length - 1)) * 100;
+                handle.style.left = `${percentage}%`;
+                progress.style.width = `${percentage}%`;
+                
+                const item = timelineData[index];
+                dateDisplay.textContent = new Date(item.date).toLocaleDateString();
+                
+                // Update project content
+                projectContent.innerHTML = `
+                    <div class="project-title">
+                        <span>${item.title}</span>
+                        <div class="project-badge">${item.badge}</div>
+                    </div>
+                    <p>${item.description}</p>
+                    <div class="project-details">
+                        <div class="project-info">
+                            <h3>Project Date: ${new Date(item.date).toLocaleDateString()}</h3>
+                            <p>This milestone represents a key achievement in my data science journey.</p>
+                        </div>
+                    </div>
+                `;
+
+                // Update markers
+                document.querySelectorAll('.timeline-marker').forEach((marker, i) => {
+                    marker.classList.toggle('active', i === index);
+                });
+            }
+
+            function getIndexFromPosition(clientX) {
+                const sliderRect = slider.getBoundingClientRect();
+                const percentage = Math.max(0, Math.min(1, (clientX - sliderRect.left) / sliderRect.width));
+                return Math.round(percentage * (timelineData.length - 1));
+            }
+
+            // Handle dragging
+            handle.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const newIndex = getIndexFromPosition(e.clientX);
+                if (newIndex !== currentIndex) {
+                    currentIndex = newIndex;
+                    updateTimeline(currentIndex);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Handle clicking on slider
+            slider.addEventListener('click', (e) => {
+                if (e.target === handle) return;
+                
+                const newIndex = getIndexFromPosition(e.clientX);
+                currentIndex = newIndex;
+                updateTimeline(currentIndex);
+            });
+
+            // Handle marker clicks
+            markersContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('timeline-marker')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    currentIndex = index;
+                    updateTimeline(currentIndex);
+                }
+            });
+
+            // Initialize with first item
+            updateTimeline(0);
+        }
+
+        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-
             const chatInput = document.getElementById('chat-input');
-
             const sendButton = document.getElementById('send-button');
-
             const toggleButton = document.getElementById('toggle-chat');
-
             const chatWidget = document.getElementById('chat-widget');
 
-
-
             // Send message on button click
-
             if (sendButton) {
-
                 sendButton.addEventListener('click', sendMessage);
-
             }
-
-
 
             // Send message on Enter key
-
             if (chatInput) {
-
                 chatInput.addEventListener('keypress', function(e) {
-
                     if (e.key === 'Enter') {
-
                         sendMessage();
-
                     }
-
                 });
-
             }
-
-
 
             // Toggle chat widget
-
             if (toggleButton && chatWidget) {
-
                 toggleButton.addEventListener('click', function() {
-
                     chatWidget.classList.toggle('open');
-
                 });
-
             }
 
+            // Initialize timeline
+            initializeTimeline();
         });
 
-
-
         // Make functions available globally
-
         window.sendMessage = sendMessage;
-
     </script>
 
-
-
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        main {
+            margin-top: 60px;
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #333;
+        }
+
+        /* Timeline Styles */
+        .timeline-wrapper {
+            position: relative;
+            width: 80%;
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+
+        .timeline-line {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .timeline-progress {
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .timeline-slider {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .timeline-handle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            cursor: grab;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .timeline-handle:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .timeline-handle:active {
+            cursor: grabbing;
+        }
+
+        .date-display {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .timeline-markers {
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+            height: 20px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-marker:hover {
+            background: #667eea;
+            transform: translateX(-50%) scale(1.2);
+        }
+
+        .timeline-marker.active {
+            background: #667eea;
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        .project-showcase {
+            width: 80%;
+            max-width: 800px;
+            margin-top: 2rem;
+        }
+
+        .project-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+
+        .project-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .project-title span {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .project-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .project-details {
+            margin-top: 1rem;
+        }
+
+        .project-info h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Project grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .project-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .view-project {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .view-project:hover {
+            opacity: 0.9;
+        }
 
         /* Chatbot Styles */
-
         .chat-widget {
-
             position: fixed;
-
             bottom: 20px;
-
             right: 20px;
-
             width: 350px;
-
             height: 500px;
-
             background: white;
-
             border-radius: 10px;
-
             box-shadow: 0 5px 30px rgba(0,0,0,0.2);
-
             transform: translateY(100%);
-
             transition: transform 0.3s ease;
-
             z-index: 1000;
-
             display: flex;
-
             flex-direction: column;
-
         }
-
-
 
         .chat-widget.open {
-
             transform: translateY(0);
-
         }
-
-
 
         .chat-header {
-
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
             color: white;
-
             padding: 15px;
-
             border-radius: 10px 10px 0 0;
-
             font-weight: bold;
-
             text-align: center;
-
         }
-
-
 
         .chat-messages {
-
             flex: 1;
-
             overflow-y: auto;
-
             padding: 15px;
-
             background: #f8f9fa;
-
         }
-
-
 
         .message {
-
             margin-bottom: 15px;
-
             max-width: 80%;
-
         }
-
-
 
         .message.user {
-
             margin-left: auto;
-
         }
-
-
 
         .message.user .message-content {
-
             background: #667eea;
-
             color: white;
-
             border-radius: 18px 18px 5px 18px;
-
         }
-
-
 
         .message.ai .message-content {
-
             background: white;
-
             color: #333;
-
             border-radius: 18px 18px 18px 5px;
-
             border: 1px solid #e0e0e0;
-
         }
-
-
 
         .message-content {
-
             padding: 10px 15px;
-
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-
         }
-
-
 
         .message-text {
-
             margin-bottom: 5px;
-
         }
-
-
 
         .message-time {
-
             font-size: 0.8em;
-
             opacity: 0.7;
-
         }
-
-
 
         .typing-dots {
-
             display: flex;
-
             gap: 4px;
-
             padding: 5px 0;
-
         }
-
-
 
         .typing-dots span {
-
             width: 8px;
-
             height: 8px;
-
             border-radius: 50%;
-
             background: #999;
-
             animation: typing 1.4s infinite;
-
         }
-
-
 
         .typing-dots span:nth-child(2) {
-
             animation-delay: 0.2s;
-
         }
-
-
 
         .typing-dots span:nth-child(3) {
-
             animation-delay: 0.4s;
-
         }
-
-
 
         @keyframes typing {
-
             0%, 60%, 100% {
-
                 transform: translateY(0);
-
             }
-
             30% {
-
                 transform: translateY(-10px);
-
             }
-
         }
-
-
 
         .chat-input-container {
-
             padding: 15px;
-
             background: white;
-
             border-radius: 0 0 10px 10px;
-
             border-top: 1px solid #e0e0e0;
-
             display: flex;
-
             gap: 10px;
-
         }
-
-
 
         .chat-input {
-
             flex: 1;
-
             padding: 10px;
-
             border: 1px solid #ddd;
-
             border-radius: 20px;
-
             outline: none;
-
             font-size: 14px;
-
         }
-
-
 
         .send-button {
-
             background: #667eea;
-
             color: white;
-
             border: none;
-
             border-radius: 50%;
-
             width: 40px;
-
             height: 40px;
-
             cursor: pointer;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             transition: background 0.3s ease;
-
         }
-
-
 
         .send-button:hover {
-
             background: #5a67d8;
-
         }
-
-
 
         .send-button:disabled {
-
             background: #ccc;
-
             cursor: not-allowed;
-
         }
-
-
 
         .chat-toggle {
-
             position: fixed;
-
             bottom: 20px;
-
             right: 20px;
-
             width: 60px;
-
             height: 60px;
-
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
             border: none;
-
             border-radius: 50%;
-
             color: white;
-
             font-size: 24px;
-
             cursor: pointer;
-
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-
             transition: transform 0.3s ease;
-
             z-index: 1001;
-
         }
-
-
 
         .chat-toggle:hover {
-
             transform: scale(1.1);
-
         }
-
-
 
         .chat-widget.open + .chat-toggle {
-
             transform: rotate(45deg);
-
         }
-
-
 
         /* Home section enhancement */
-
         .home-intro {
-
             max-width: 800px;
-
             margin: 0 auto;
-
             text-align: center;
-
             padding: 40px 20px;
-
         }
-
-
 
         .home-intro h1 {
-
             font-size: 3em;
-
             margin-bottom: 20px;
-
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
             -webkit-background-clip: text;
-
             -webkit-text-fill-color: transparent;
-
             background-clip: text;
-
         }
-
-
 
         .home-intro p {
-
             font-size: 1.2em;
-
             line-height: 1.6;
-
             color: #666;
-
             margin-bottom: 30px;
-
         }
-
-
 
         .chat-prompt {
-
             background: #f8f9fa;
-
             padding: 20px;
-
             border-radius: 10px;
-
             margin-top: 30px;
-
             border-left: 4px solid #667eea;
-
         }
-
-
 
         .chat-prompt h3 {
-
             margin-bottom: 10px;
-
             color: #333;
-
         }
-
-
 
         .chat-prompt p {
-
             margin: 0;
-
             font-size: 1em;
-
         }
 
-    </style>
+        /* LLM Analysis section */
+        .llm-dashboard {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
+        .gpu-status {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .analysis-controls {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+        }
+
+        .analysis-controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+
+        .analysis-controls button:hover {
+            opacity: 0.9;
+        }
+
+        #gpu-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #28a745;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .timeline-wrapper {
+                width: 95%;
+            }
+            
+            .project-showcase {
+                width: 95%;
+            }
+            
+            .chat-widget {
+                width: 300px;
+                height: 400px;
+            }
+            
+            .home-intro h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
     <nav>
-
         <ul>
-
             <li><a href="#home">Home</a></li>
-
             <li><a href="#timeline">Timeline</a></li>
-
             <li><a href="#projects">Projects</a></li>
-
             <li><a href="#llm-analysis">LLM Analysis</a></li>
-
             <li><a href="#contact">Contact</a></li>
-
         </ul>
-
     </nav>
 
-
-
     <main>
-
         <section id="home">
-
             <div class="home-intro">
-
                 <h1>Welcome to Simon's Projects!</h1>
-
                 <p>
-
                     Explore my journey through data science, machine learning, and AI development. 
-
                     This interactive portfolio showcases my projects, timeline, and analytical work.
-
                 </p>
-
                 <div class="chat-prompt">
-
                     <h3>💬 Ask me anything!</h3>
-
                     <p>I've integrated an AI assistant powered by Google's Gemini API. Click the chat button below to ask questions about my projects, get coding help, or just have a conversation!</p>
-
                 </div>
-
             </div>
-
         </section>
-
-
 
         <section id="timeline">
-
             <h2>Project Timeline</h2>
-
             <p>Drag the slider to explore my data science journey chronologically</p>
-
             <div class="timeline-wrapper">
-
                 <div class="timeline-line"></div>
-
                 <div class="timeline-progress" id="timelineProgress"></div>
-
                 <div class="timeline-slider" id="timelineSlider">
-
                     <div class="timeline-handle" id="timelineHandle">
-
                         <div class="date-display" id="dateDisplay"></div>
-
                     </div>
-
                 </div>
-
             </div>
-
             <div class="timeline-markers" id="timelineMarkers"></div>
-
             <div class="project-showcase">
-
                 <div class="project-content active" id="projectContent">
-
                     <div class="project-title">
-
                         <span>Welcome to My Data Science Journey</span>
-
                         <div class="project-badge">Start Here</div>
-
                     </div>
-
                     <p>Drag the timeline above to explore my projects chronologically. Each point represents a milestone in my data science career.</p>
-
                     <div class="project-details">
-
                         <div class="project-info">
-
                             <h3>About This Timeline</h3>
-
                             <p>This interactive timeline showcases my progression from beginner to advanced data scientist, highlighting key projects and learning milestones.</p>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
-
-
 
         <section id="projects">
-
             <h2>Data Science Projects</h2>
-
             <div class="project-grid">
-
                 <div class="project-card" data-project="project1">
-
                     <h3>Project 1: Data Analysis</h3>
-
                     <p>Description of your first project</p>
-
                     <button class="view-project">View Interactive Exhibit</button>
-
                 </div>
-
             </div>
-
         </section>
-
-
 
         <section id="llm-analysis">
-
             <h2>Language Model Prompt Analysis</h2>
-
             <div class="llm-dashboard">
-
                 <div class="gpu-status">
-
                     <h3>GPU Processing Status</h3>
-
                     <div id="gpu-indicator"></div>
-
                 </div>
-
                 <div class="analysis-controls">
-
                     <button id="run-analysis">Run New Analysis</button>
-
                     <button id="view-results">View Results</button>
-
                 </div>
-
             </div>
-
         </section>
-
     </main>
 
-
-
     <!-- Chat Widget -->
-
     <div class="chat-widget" id="chat-widget">
-
         <div class="chat-header">
-
             AI Assistant - Powered by Gemini
-
         </div>
-
         <div class="chat-messages" id="chat-messages"></div>
-
         <div class="chat-input-container">
-
             <input type="text" class="chat-input" id="chat-input" placeholder="Type your message...">
 
-            <button class="send-button" id="send-button">➤</button>
-
-        </div>
-
-    </div>
 
 
 
-    <!-- Chat Toggle Button -->
 
-    <button class="chat-toggle" id="toggle-chat">💬</button>
-
-
-
-    <script src="js/main.js"></script>
-
-</body>
-
-</html>
