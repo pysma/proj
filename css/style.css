@@ -5,12 +5,11 @@
 }
 
 body {
-    font-family: 'Inter', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
-
 
 nav {
     background: rgba(255, 255, 255, 0.1);
@@ -53,6 +52,255 @@ section {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+/* Timeline Styles */
+.timeline-wrapper {
+    position: relative;
+    padding: 2rem 0;
+    margin: 2rem 0;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+    transform: translateY(-50%);
+}
+
+.timeline-progress {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    border-radius: 2px;
+    transform: translateY(-50%);
+    transition: width 0.3s ease;
+    z-index: 5;
+}
+
+.timeline-slider {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.timeline-handle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.timeline-handle:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-handle:active {
+    cursor: grabbing;
+}
+
+.date-display {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.date-display.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+.timeline-markers {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 3rem 0;
+}
+
+.timeline-marker {
+    position: relative;
+    text-align: center;
+    flex: 1;
+    opacity: 0.4;
+    transition: all 0.3s ease;
+}
+
+.timeline-marker.active {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.marker-dot {
+    width: 12px;
+    height: 12px;
+    background: #ccc;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    transition: all 0.3s ease;
+}
+
+.timeline-marker.active .marker-dot {
+    background: #667eea;
+    transform: scale(1.3);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.marker-date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.marker-title {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.marker-description {
+    font-size: 0.8rem;
+    color: #777;
+    max-width: 150px;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+.project-showcase {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 3rem;
+    transition: all 0.5s ease;
+    min-height: 300px;
+}
+
+.project-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.project-content.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.project-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.project-badge {
+    background: #667eea;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.project-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.project-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.project-info h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.project-info p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tech-tag {
+    background: #f0f2f5;
+    color: #555;
+    padding: 0.3rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.project-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.project-link {
+    background: #667eea;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.project-link:hover {
+    background: #764ba2;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Existing styles continue... */
 .project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -75,17 +323,16 @@ section {
 .view-project {
     background: #667eea;
     color: white;
-    border: 2px solid #e6f0ff; /* Light pastel border */
+    border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.3s;
+    transition: background 0.3s;
 }
 
 .view-project:hover {
     background: #764ba2;
-    border-color: #f0e6ff;
 }
 
 .llm-dashboard {
@@ -127,16 +374,47 @@ section {
 button {
     background: #28a745;
     color: white;
-    border: 2px solid #e6ffe6; /* border */
+    border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
     font-weight: 500;
     margin: 0.5rem;
-    transition: all 0.3s;
+    transition: background 0.3s;
 }
 
 button:hover {
     background: #218838;
-    border-color: #f0ffe6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .project-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-markers {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .timeline-marker {
+        text-align: left;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+    
+    .project-title {
+        font-size: 1.5rem;
+    }
+    
+    .llm-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 }
