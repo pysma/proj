@@ -25,32 +25,32 @@ const projects = [
             demo: "#"
         }
     },
-    {
-        date: "2023-04-22",
-        title: "Machine Learning Classifier",
-        description: "Built my first ML model for prediction tasks",
-        badge: "Intermediate",
-        details: {
-            overview: "Developed a sophisticated machine learning classifier to predict customer churn using advanced feature engineering and model selection techniques.",
-            outcomes: "Achieved 89% accuracy with ensemble methods and deployed the model to production using Flask API.",
-            tech: ["Scikit-learn", "XGBoost", "Flask", "Docker", "AWS"],
-            github: "#",
-            demo: "#"
-        }
-    },
-    {
-        date: "2023-07-10",
-        title: "Deep Learning Neural Network",
-        description: "Explored neural networks for image classification",
-        badge: "Advanced",
-        details: {
-            overview: "Built a convolutional neural network for image classification using TensorFlow. Implemented data augmentation and transfer learning techniques.",
-            outcomes: "Achieved 94% accuracy on test set and learned advanced deep learning concepts including regularization and optimization.",
-            tech: ["TensorFlow", "Keras", "OpenCV", "NumPy", "GPU Computing"],
-            github: "#",
-            demo: "#"
-        }
-    },
+ //   {
+        // date: "2023-04-22",
+        // title: "Machine Learning Classifier",
+        //description: "Built my first ML model for prediction tasks",
+        //badge: "Intermediate",
+        //details: {
+          //  overview: "Developed a sophisticated machine learning classifier to predict customer churn using advanced feature engineering and model selection techniques.",
+            //outcomes: "Achieved 89% accuracy with ensemble methods and deployed the model to production using Flask API.",
+           // tech: ["Scikit-learn", "XGBoost", "Flask", "Docker", "AWS"],
+           // github: "#",
+           // demo: "#"
+     //   }
+  //  },
+  //  {
+    //    date: "2023-07-10",
+     //   title: "Deep Learning Neural Network",
+//        description: "Explored neural networks for image classification",
+  //      badge: "Advanced",
+//        details: {
+//            overview: "Built a convolutional neural network for image classification using TensorFlow. Implemented data augmentation and transfer learning techniques.",
+ //           outcomes: "Achieved 94% accuracy on test set and learned advanced deep learning concepts including regularization and optimization.",
+//            tech: ["TensorFlow", "Keras", "OpenCV", "NumPy", "GPU Computing"],
+//            github: "#",
+  //          demo: "#"
+    //    }
+   // },
     {
         date: "2024-10-05",
         title: "NLP Sentiment Analysis",
