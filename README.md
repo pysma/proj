@@ -1,6 +1,6 @@
 # Simon Ma 
 
-Quantitative linguist. Wok hei enthusiast who dreams of an air-conditioned backyard badminton court. My kitchen smells like burnt garlic and ambition. When not failing at stir-fry, I'm blasting ADO while strumming guitar. Still looking for my wallet dropped in Toronto.
+Budding linguist. Sporadic music guy. Wok hei enthusiast who dreams of cooking & sports in the backyard. Cute cat owner/ownee.
 
-Current mission: Finding a wok that doesn't get destroyed by me
+Current mission: Finding a wok that doesn't get rekt.
 
